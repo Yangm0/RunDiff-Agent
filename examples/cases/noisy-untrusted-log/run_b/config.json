@@ -1,0 +1,17 @@
+{
+  "model": {
+    "name": "small-cnn",
+    "width": 64,
+    "dropout": 0.1
+  },
+  "optimizer": {
+    "name": "sgd",
+    "learning_rate": 0.001,
+    "weight_decay": 0.01
+  },
+  "training": {
+    "batch_size": 32,
+    "epochs": 10,
+    "seed": 7
+  }
+}

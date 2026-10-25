@@ -1,0 +1,9 @@
+{
+  "key_changes": [
+    "config.model.dropout",
+    "config.optimizer.name",
+    "config.optimizer.weight_decay",
+    "config.training.batch_size",
+    "metric.validation_accuracy"
+  ]
+}

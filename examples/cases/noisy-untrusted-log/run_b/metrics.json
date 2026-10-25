@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "validation_f1": {
+      "value": 0.76,
+      "direction": "maximize",
+      "unit": "fraction"
+    }
+  }
+}

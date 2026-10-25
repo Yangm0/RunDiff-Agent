@@ -1,0 +1,34 @@
+[
+  {
+    "id": "learning-rate-wave",
+    "title": "Learning-rate change and training metric movement"
+  },
+  {
+    "id": "dataset-revision",
+    "title": "Dataset revision changed between runs"
+  },
+  {
+    "id": "dependency-drift",
+    "title": "Python and dependency versions differ"
+  },
+  {
+    "id": "seed-variance",
+    "title": "Random seed changed with a modest score shift"
+  },
+  {
+    "id": "interrupted-training",
+    "title": "Training run stopped after an exception"
+  },
+  {
+    "id": "several-config-changes",
+    "title": "Multiple training and model settings changed together"
+  },
+  {
+    "id": "unexplained-metric-shift",
+    "title": "Metric changed without an obvious configuration explanation"
+  },
+  {
+    "id": "noisy-untrusted-log",
+    "title": "Irrelevant warnings and prompt-like log text"
+  }
+]

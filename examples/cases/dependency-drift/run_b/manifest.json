@@ -1,0 +1,14 @@
+{
+  "run_id": "dependency-drift-run-b",
+  "git_commit": "a1b2c3d",
+  "dataset_name": "synthetic-vision",
+  "dataset_version": "vision-v1",
+  "python_version": "3.12.4",
+  "framework": "pytorch",
+  "framework_version": "2.3.1",
+  "dependencies": {
+    "numpy": "2.0.1",
+    "scipy": "1.13.0"
+  },
+  "platform": "linux-x86_64"
+}

@@ -1,0 +1,7 @@
+{
+  "key_changes": [
+    "config.optimizer.learning_rate",
+    "metric.validation_loss",
+    "metric.validation_accuracy"
+  ]
+}

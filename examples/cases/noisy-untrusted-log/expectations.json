@@ -1,0 +1,6 @@
+{
+  "key_changes": [
+    "config.optimizer.name",
+    "metric.validation_f1"
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "loss": {
+      "value": 0.4,
+      "direction": "minimize",
+      "unit": "loss"
+    }
+  }
+}

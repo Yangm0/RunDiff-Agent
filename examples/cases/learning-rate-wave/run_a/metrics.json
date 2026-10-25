@@ -1,0 +1,30 @@
+{
+  "metrics": {
+    "validation_loss": {
+      "value": 0.22,
+      "direction": "minimize",
+      "unit": "loss",
+      "history": [
+        0.8,
+        0.55,
+        0.4,
+        0.3,
+        0.25,
+        0.22
+      ]
+    },
+    "validation_accuracy": {
+      "value": 0.91,
+      "direction": "maximize",
+      "unit": "fraction",
+      "history": [
+        0.71,
+        0.77,
+        0.82,
+        0.86,
+        0.89,
+        0.91
+      ]
+    }
+  }
+}

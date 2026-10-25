@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "test_accuracy": {
+      "value": 0.1,
+      "direction": "maximize",
+      "unit": "fraction"
+    }
+  }
+}

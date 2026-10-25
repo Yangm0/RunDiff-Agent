@@ -1,0 +1,22 @@
+{
+  "metrics": {
+    "accuracy": {
+      "value": 0.86,
+      "direction": "maximize",
+      "unit": "fraction",
+      "history": [
+        0.74,
+        0.79,
+        0.83,
+        0.84,
+        0.85,
+        0.86
+      ]
+    },
+    "loss": {
+      "value": 0.34,
+      "direction": "minimize",
+      "unit": "loss"
+    }
+  }
+}

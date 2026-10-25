@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "auroc": {
+      "value": 0.73,
+      "direction": "maximize",
+      "unit": "fraction"
+    }
+  }
+}

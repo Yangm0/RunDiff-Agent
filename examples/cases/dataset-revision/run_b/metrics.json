@@ -1,0 +1,9 @@
+{
+  "metrics": {
+    "validation_accuracy": {
+      "value": 0.86,
+      "direction": "maximize",
+      "unit": "fraction"
+    }
+  }
+}
