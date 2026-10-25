@@ -1,8 +1,9 @@
 name: CI
 
+# Temporary release pause while the GitHub Actions quota is exhausted.
+# Restore push and pull_request triggers after the quota resets.
 on:
-  push:
-  pull_request:
+  workflow_dispatch:
 
 jobs:
   quality:

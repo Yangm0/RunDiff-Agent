@@ -115,13 +115,16 @@ The demo command writes report.json, report.md, and trace.jsonl under outputs/de
 
 rundiff eval --mode mock reports per-case planted-change recall, key-difference precision, evidence validity, unsupported claim counts, tool success rate, steps, and elapsed time. Its label is mock_flow_validation. If a live API key is configured, the runner can also record a one-shot live baseline; it does not invent a score when calls fail.
 
-The CI workflow installs development dependencies, runs Ruff, and runs pytest. Test results and evaluation results in this README describe only commands actually executed for the current revision.
+The retained CI workflow installs development dependencies, runs Ruff, and runs pytest. Its automatic `push` and `pull_request` triggers are temporarily paused for this release; only manual dispatch is enabled while the GitHub Actions quota is exhausted. After the quota resets, restore the `push` and `pull_request` entries in `.github/workflows/ci.yml`.
+
+Test results and evaluation results in this README describe only commands actually executed for the current revision. GitHub Actions was not run for this release; the checks below were performed locally.
 
 Verified locally with Python 3.13.2:
 
 - Ruff: ruff check . — passed.
 - Tests: pytest -q — 51 passed.
 - CLI: the learning-rate-wave Mock Mode analysis completed and wrote all three output files.
+- CLI compare: the learning-rate-wave run folders were compared locally.
 - Evaluation: 8/8 synthetic cases; mean planted-change recall 1.0, mean key-difference precision 1.0, and Mock tool-call success rate 1.0.
 - FastAPI: TestClient passed health, example listing, Swagger, successful analysis, arbitrary-path rejection, and the missing-key Live Mode response.
 - No OPENAI_API_KEY was configured. Live LLM calls and the one-shot live baseline were not run. The evaluation scores above are deterministic and Mock workflow checks, not LLM quality results.
