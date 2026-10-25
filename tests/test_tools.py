@@ -73,6 +73,44 @@ def test_metric_direction_unit_delta_and_history_signal(run_pair_factory):
     assert result["history_run_b"]["flagged"] is True
 
 
+def test_metric_missing_in_run_a_uses_run_b_evidence(run_pair_factory):
+    metric = {"value": 0.42, "direction": "maximize", "unit": "fraction"}
+    run_a, run_b = run_pair_factory(
+        metrics_a={"only_a": {"value": 0.1, "direction": "neutral", "unit": "score"}},
+        metrics_b={"missing_from_a": metric},
+    )
+    pair = load_pair(run_a, run_b)
+    result = analyze_metrics(pair)
+    comparison = next(item for item in result["comparisons"] if item["name"] == "missing_from_a")
+    evidence = next(
+        item for item in result["evidence"] if item.evidence_id == comparison["evidence_ids"][0]
+    )
+
+    assert comparison["status"] == "missing_in_run_a"
+    assert evidence.run_id == pair.run_b.run_id
+    assert evidence.value == metric["value"]
+    assert validate_evidence([evidence], pair)["valid"] is True
+
+
+def test_metric_missing_in_run_b_uses_run_a_evidence(run_pair_factory):
+    metric = {"value": 0.73, "direction": "minimize", "unit": "loss"}
+    run_a, run_b = run_pair_factory(
+        metrics_a={"missing_from_b": metric},
+        metrics_b={"only_b": {"value": 0.2, "direction": "neutral", "unit": "score"}},
+    )
+    pair = load_pair(run_a, run_b)
+    result = analyze_metrics(pair)
+    comparison = next(item for item in result["comparisons"] if item["name"] == "missing_from_b")
+    evidence = next(
+        item for item in result["evidence"] if item.evidence_id == comparison["evidence_ids"][0]
+    )
+
+    assert comparison["status"] == "missing_in_run_b"
+    assert evidence.run_id == pair.run_a.run_id
+    assert evidence.value == metric["value"]
+    assert validate_evidence([evidence], pair)["valid"] is True
+
+
 def test_unknown_or_incompatible_metric_definitions_are_not_ranked(run_pair_factory):
     metrics_a = {
         "value": {"value": 2.0, "direction": "neutral", "unit": "score"},

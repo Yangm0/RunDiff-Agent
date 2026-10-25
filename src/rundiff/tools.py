@@ -219,7 +219,7 @@ def analyze_metrics(runs: RunPair) -> dict[str, Any]:
     for name in sorted(set(a) | set(b)):
         left, right = a.get(name), b.get(name)
         if left is None or right is None:
-            run, metric = (runs.run_a, right) if left is None else (runs.run_b, left)
+            run, metric = (runs.run_b, right) if left is None else (runs.run_a, left)
             assert metric is not None
             item = _metric_evidence(run, name, metric)
             evidence.append(item)

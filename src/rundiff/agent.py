@@ -652,6 +652,16 @@ def run_agent(
             f"{len(findings)} deterministic findings and {len(evidence)} unique evidence item(s). "
             "Static comparisons do not establish causation."
         ),
+        "investigation_summary": (
+            {
+                "text": redact(draft.summary)[:1000],
+                "source": "mock_model_simulation" if mode == "mock" else "live_model",
+                "is_simulated": mode == "mock",
+                "verified": False,
+            }
+            if draft
+            else None
+        ),
         "findings": [item.model_dump(mode="json") for item in findings],
         "hypotheses": [item.model_dump(mode="json") for item in hypotheses],
         "unresolved_questions": (

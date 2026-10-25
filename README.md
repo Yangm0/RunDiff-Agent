@@ -109,7 +109,7 @@ For the bundled learning-rate-wave case, a real Mock Mode run reported:
     decision rounds: 3
     evidence records: 9; validation: valid
 
-The demo command writes report.json, report.md, and trace.jsonl under outputs/demo. The JSON includes evidence records and validation status; the JSONL trace includes model and tool steps, outcome, duration, and evidence count.
+The demo command writes report.json, report.md, and trace.jsonl under outputs/demo. The JSON includes evidence records and validation status; the JSONL trace includes model and tool steps, outcome, duration, and evidence count. The deterministic `summary` remains available, with a separate bounded `investigation_summary` showing its source and verification status. Mock summaries are labeled as simulations; Live summaries are model-generated and are not deterministically verified.
 
 ## Evaluation and verification
 

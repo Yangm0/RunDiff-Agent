@@ -185,7 +185,23 @@ def validate_findings(
         invalid_ids = [item for item in finding.evidence_ids if item not in valid]
         if invalid_ids:
             warnings.append(f"{finding.claim_id}: rejected unknown evidence IDs {invalid_ids}")
-        if finding.evidence_ids and not trusted_ids:
+        high_confidence = finding.classification in {
+            ClaimType.OBSERVED,
+            ClaimType.SUPPORTED_HYPOTHESIS,
+        }
+        if invalid_ids and high_confidence:
+            warnings.append(
+                f"{finding.claim_id}: downgraded to UNVERIFIED because "
+                "cited evidence IDs were invalid."
+            )
+            finding = Finding.model_validate(
+                {
+                    **finding.model_dump(mode="json"),
+                    "classification": ClaimType.UNVERIFIED.value,
+                    "evidence_ids": trusted_ids,
+                }
+            )
+        elif finding.evidence_ids and not trusted_ids:
             finding = Finding.model_validate(
                 {
                     **finding.model_dump(mode="json"),
@@ -193,14 +209,7 @@ def validate_findings(
                     "evidence_ids": [],
                 }
             )
-        elif (
-            finding.classification
-            in {
-                ClaimType.OBSERVED,
-                ClaimType.SUPPORTED_HYPOTHESIS,
-            }
-            and not trusted_ids
-        ):
+        elif high_confidence and not trusted_ids:
             finding = Finding.model_validate(
                 {
                     **finding.model_dump(mode="json"),

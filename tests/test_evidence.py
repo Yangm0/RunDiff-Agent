@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import pytest
+
 from rundiff.evidence import make_evidence, validate_evidence, validate_findings
 from rundiff.loader import load_pair
 from rundiff.models import ClaimType, EvidenceKind, Finding
+from rundiff.tools import compare_configs
 
 
 def test_invalid_evidence_id_and_bad_source_are_rejected(run_pair_factory):
@@ -74,9 +77,50 @@ def test_claim_with_fictitious_evidence_becomes_unverified(run_pair_factory):
     assert warnings
 
 
-def test_claim_with_unsupported_number_becomes_unverified(run_pair_factory):
-    from rundiff.tools import compare_configs
+@pytest.mark.parametrize(
+    "classification",
+    [ClaimType.OBSERVED, ClaimType.SUPPORTED_HYPOTHESIS],
+)
+def test_mixed_valid_and_invalid_citations_downgrade_claim(run_pair_factory, classification):
+    pair = load_pair(*run_pair_factory())
+    evidence = compare_configs(pair)["evidence"]
+    claim = Finding(
+        claim_id="mixed-citations",
+        classification=classification,
+        text="The configuration changed between runs.",
+        evidence_ids=[evidence[0].evidence_id, "E_CONFIG_forged"],
+    )
 
+    validated, warnings = validate_findings([claim], evidence, pair)
+
+    assert validated[0].classification == ClaimType.UNVERIFIED
+    assert validated[0].evidence_ids == [evidence[0].evidence_id]
+    assert any("downgraded to UNVERIFIED" in warning for warning in warnings)
+
+
+@pytest.mark.parametrize(
+    "classification",
+    [ClaimType.OBSERVED, ClaimType.SUPPORTED_HYPOTHESIS],
+)
+def test_all_valid_citations_preserve_claim(run_pair_factory, classification):
+    pair = load_pair(*run_pair_factory())
+    evidence = compare_configs(pair)["evidence"]
+    citations = [item.evidence_id for item in evidence]
+    claim = Finding(
+        claim_id="valid-citations",
+        classification=classification,
+        text="The configuration changed between runs.",
+        evidence_ids=citations,
+    )
+
+    validated, warnings = validate_findings([claim], evidence, pair)
+
+    assert validated[0].classification == classification
+    assert validated[0].evidence_ids == citations
+    assert warnings == []
+
+
+def test_claim_with_unsupported_number_becomes_unverified(run_pair_factory):
     pair = load_pair(*run_pair_factory())
     evidence = compare_configs(pair)["evidence"]
     claim = Finding(

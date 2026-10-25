@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import json
+
 from fastapi.testclient import TestClient
 from typer.testing import CliRunner
 
 from rundiff.api import app
 from rundiff.cli import app as cli
 from rundiff.evaluation import run_evaluation
+from rundiff.service import ApplicationService
 
 
 def test_fastapi_health_examples_docs_and_analysis():
@@ -62,6 +65,24 @@ def test_cli_analyze_writes_three_outputs(tmp_path):
     assert (tmp_path / "report.json").is_file()
     assert (tmp_path / "report.md").is_file()
     assert (tmp_path / "trace.jsonl").is_file()
+
+
+def test_analyze_example_writes_final_report_once(tmp_path, monkeypatch):
+    service = ApplicationService()
+    write_outputs = service.write_outputs
+    writes = []
+
+    def count_writes(report, output_dir):
+        writes.append(report.copy())
+        write_outputs(report, output_dir)
+
+    monkeypatch.setattr(service, "write_outputs", count_writes)
+    report = service.analyze_example("learning-rate-wave", mode="mock", output_dir=tmp_path)
+    saved = json.loads((tmp_path / "report.json").read_text(encoding="utf-8"))
+
+    assert len(writes) == 1
+    assert report["example_id"] == "learning-rate-wave"
+    assert saved["example_id"] == report["example_id"]
 
 
 def test_evaluation_uses_eight_cases_and_reports_mock_validation(tmp_path):

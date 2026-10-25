@@ -81,7 +81,7 @@ class ApplicationService:
         model: Any | None = None,
     ) -> dict[str, Any]:
         run_a, run_b = get_example(example_id)
-        report = self.analyze(run_a, run_b, mode=mode, output_dir=output_dir, model=model)
+        report = self.analyze(run_a, run_b, mode=mode, model=model)
         report["example_id"] = example_id
         if output_dir is not None:
             self.write_outputs(report, output_dir)
@@ -121,10 +121,23 @@ def report_to_markdown(report: dict[str, Any]) -> str:
         "## Summary",
         "",
         report["summary"],
-        "",
-        "## Observed findings",
-        "",
     ]
+    investigation = report.get("investigation_summary")
+    if investigation:
+        label = (
+            "Mock model simulation; not live LLM output and not verified."
+            if investigation.get("is_simulated")
+            else "Model-generated summary; not deterministically verified."
+        )
+        lines += [
+            "",
+            "## Investigation summary",
+            "",
+            f"_{label}_",
+            "",
+            investigation.get("text", ""),
+        ]
+    lines += ["", "## Observed findings", ""]
     findings = report.get("findings", [])
     if findings:
         for finding in findings:

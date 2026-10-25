@@ -5,6 +5,7 @@ import json
 from langchain_core.messages import AIMessage
 
 from rundiff.agent import LiveModelUnavailable, run_agent
+from rundiff.service import report_to_markdown
 
 VALID_DRAFT = json.dumps(
     {
@@ -44,6 +45,9 @@ def test_mock_agent_runs_langgraph_tool_loop_and_validates_evidence(example_pair
     assert report["tool_calls"] == 2
     assert report["decision_rounds"] == 3
     assert report["validation"]["valid"] is True
+    assert report["investigation_summary"]["source"] == "mock_model_simulation"
+    assert report["investigation_summary"]["is_simulated"] is True
+    assert report["investigation_summary"]["verified"] is False
     assert report["findings"]
     assert any(item["step"] == "tool" and item["success"] for item in report["trace"])
 
@@ -74,6 +78,34 @@ def test_invalid_structured_output_does_not_claim_completion(run_pair_factory):
     report = run_agent(pair, mode="live", model=ScriptedModel([AIMessage(content="not JSON")]))
     assert report["status"] == "partial"
     assert "Structured AgentDraft parsing failed" in report["errors"][0]
+
+
+def test_structured_model_summary_is_redacted_bounded_and_reported(run_pair_factory):
+    from rundiff.loader import load_pair
+
+    pair = load_pair(*run_pair_factory())
+    summary = "API_KEY=synthetic-secret-value " + "x" * 1100
+    draft = json.dumps(
+        {
+            "summary": summary,
+            "hypotheses": [],
+            "unresolved_questions": [],
+            "recommended_checks": [],
+        }
+    )
+    report = run_agent(pair, mode="live", model=ScriptedModel([AIMessage(content=draft)]))
+
+    investigation = report["investigation_summary"]
+    assert investigation["source"] == "live_model"
+    assert investigation["is_simulated"] is False
+    assert investigation["verified"] is False
+    assert len(investigation["text"]) <= 1000
+    assert "API_KEY=[REDACTED]" in investigation["text"]
+    assert "synthetic-secret-value" not in investigation["text"]
+    markdown = report_to_markdown(report)
+    assert "## Investigation summary" in markdown
+    assert "Model-generated summary; not deterministically verified." in markdown
+    assert investigation["text"] in markdown
 
 
 def test_unknown_evidence_in_model_draft_is_unverified(run_pair_factory):
