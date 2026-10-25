@@ -11,7 +11,7 @@ The repository contains only synthetic demonstration runs. The HTTP API accepts 
 - Validates manifest.json, config.json, and metrics.json with Pydantic v2.
 - Compares nested configuration, runtime and dependency metadata, and explicitly defined metrics.
 - Reads bounded, line-numbered log excerpts without executing or obeying log contents.
-- Runs a LangGraph StateGraph with real tool calling, per-request state, duplicate-call checks, and call/round budgets.
+- Runs a LangGraph StateGraph with model tool calling, per-request state, duplicate-call checks, call/round budgets, and bounded no-tool finalization.
 - Supports a clearly labeled deterministic Mock Mode without credentials and an OpenAI-compatible Live Mode.
 - Verifies evidence IDs, run ownership, JSON paths and values, log line numbers, and excerpts before building a report.
 - Writes report.json, report.md, and trace.jsonl.
@@ -27,10 +27,19 @@ The repository contains only synthetic demonstration runs. The HTTP API accepts 
         -> LangGraph agent decision
         -> Validated read-only tool dispatcher
         -> Agent observation and next decision
+        -> Bounded no-tool finalization when needed
         -> Evidence validation and structured report
         -> JSON, Markdown, and JSONL trace
 
 The CLI and FastAPI handlers call the same ApplicationService.
+
+## Technology stack
+
+- Python 3.11+
+- LangGraph and LangChain for agent flow and model tool calling
+- Pydantic v2 for input, tool, and report validation
+- FastAPI for the HTTP API and Typer for the CLI
+- pytest and Ruff for local verification
 
 ## Requirements and install
 
@@ -61,6 +70,8 @@ Set credentials in the process environment, or use a local .env file with your o
     rundiff analyze --example learning-rate-wave --mode live --output-dir outputs\live
 
 OPENAI_BASE_URL is optional. Live Mode requires an actual API call. Missing credentials produce an explicit error; the program does not label Mock Mode as a live investigation. Provider calls incur normal usage charges. Token counts are recorded only when returned by the provider.
+
+Free models and OpenAI-compatible providers can differ in output limits, tool-call behavior, and structured-output support. A bounded Finalization step can produce a report from available evidence when the investigation response is unusable; it does not prove that a complete multi-round Live loop will always finish.
 
 ## CLI
 
@@ -109,7 +120,7 @@ For the bundled learning-rate-wave case, a real Mock Mode run reported:
     decision rounds: 3
     evidence records: 9; validation: valid
 
-The demo command writes report.json, report.md, and trace.jsonl under outputs/demo. The JSON includes evidence records and validation status; the JSONL trace includes model and tool steps, outcome, duration, and evidence count. The deterministic `summary` remains available, with a separate bounded `investigation_summary` showing its source and verification status. Mock summaries are labeled as simulations; Live summaries are model-generated and are not deterministically verified.
+The demo command writes report.json, report.md, and trace.jsonl under outputs/demo. The JSON includes evidence records and validation status; the JSONL trace includes model and tool steps, outcome, duration, evidence count, and available response diagnostics such as finish reason, token counts, and structured-parse status. The deterministic `summary` remains available, with a separate bounded `investigation_summary` showing its source and verification status. Mock summaries are labeled as simulations; Live summaries are model-generated and are not deterministically verified.
 
 ## Evaluation and verification
 
@@ -117,17 +128,16 @@ rundiff eval --mode mock reports per-case planted-change recall, key-difference 
 
 The retained CI workflow installs development dependencies, runs Ruff, and runs pytest. Its automatic `push` and `pull_request` triggers are temporarily paused for this release; only manual dispatch is enabled while the GitHub Actions quota is exhausted. After the quota resets, restore the `push` and `pull_request` entries in `.github/workflows/ci.yml`.
 
-Test results and evaluation results in this README describe only commands actually executed for the current revision. GitHub Actions was not run for this release; the checks below were performed locally.
+Test and evaluation results here describe commands executed locally for this release revision. GitHub Actions was not run.
 
-Verified locally with Python 3.13.2:
+Verified locally with the project's Python 3.13 environment:
 
-- Ruff: ruff check . — passed.
-- Tests: pytest -q — 51 passed.
-- CLI: the learning-rate-wave Mock Mode analysis completed and wrote all three output files.
-- CLI compare: the learning-rate-wave run folders were compared locally.
-- Evaluation: 8/8 synthetic cases; mean planted-change recall 1.0, mean key-difference precision 1.0, and Mock tool-call success rate 1.0.
-- FastAPI: TestClient passed health, example listing, Swagger, successful analysis, arbitrary-path rejection, and the missing-key Live Mode response.
-- No OPENAI_API_KEY was configured. Live LLM calls and the one-shot live baseline were not run. The evaluation scores above are deterministic and Mock workflow checks, not LLM quality results.
+- `ruff check .` — passed.
+- `pytest -q` — 62 passed, including the FastAPI TestClient coverage.
+- CLI Mock Analyze — completed and wrote report.json, report.md, and trace.jsonl; evidence validation passed.
+- Mock Evaluation — all 8 synthetic cases completed; deterministic mean recall 1.0 and Mock tool success rate 1.0. The run recorded `live_api_available=false`, so no one-shot Live baseline was called.
+
+Separate real-model smoke runs have verified Function Calling, multi-round model decisions, structured JSON report generation, and evidence validation in individual runs. A complete multi-round Live loop is not claimed as reliably reproducible. Live Mode was not called as part of this V1.0 release verification. The Mock scores validate workflow plumbing and synthetic answers; they are not real LLM quality scores.
 
 ## Security and limits
 
