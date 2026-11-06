@@ -1,7 +1,0 @@
-{
-  "key_changes": [
-    "config.training.seed",
-    "metric.accuracy",
-    "metric.loss"
-  ]
-}

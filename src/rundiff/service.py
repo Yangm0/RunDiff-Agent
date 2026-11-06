@@ -1,4 +1,4 @@
-"""Shared application service used by the CLI, API, and evaluation runner."""
+"""Shared application service used by the CLI and API."""
 
 from __future__ import annotations
 

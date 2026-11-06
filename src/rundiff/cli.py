@@ -1,4 +1,4 @@
-"""Typer commands for local comparison, analysis, and evaluation."""
+"""Typer commands for local comparison and analysis."""
 
 from __future__ import annotations
 
@@ -9,7 +9,6 @@ from typing import Annotated
 import typer
 
 from .agent import LiveModelUnavailable
-from .evaluation import run_evaluation
 from .loader import RunInputError
 from .service import ApplicationService
 
@@ -64,27 +63,6 @@ def analyze(
         typer.echo(
             f"{report['status']} ({report['mode']}): {report['summary']}\n"
             f"Report files written to {output_dir.resolve()}"
-        )
-    except (RunInputError, LiveModelUnavailable) as exc:
-        typer.secho(str(exc), fg=typer.colors.RED, err=True)
-        raise typer.Exit(code=2) from exc
-
-
-@app.command()
-def eval(
-    mode: Annotated[
-        str, typer.Option("--mode", help="Run mock flow validation or live agent evaluation.")
-    ] = "mock",
-    output_dir: Annotated[Path, typer.Option("--output-dir")] = Path("outputs/evaluation"),
-) -> None:
-    """Evaluate the synthetic cases; answer keys are never provided to the agent."""
-    if mode not in {"mock", "live"}:
-        raise typer.BadParameter("mode must be mock or live")
-    try:
-        result = run_evaluation(mode, output_dir)
-        typer.echo(
-            f"{result['evaluation_mode']}: {result['case_count']} cases; "
-            f"results written to {output_dir.resolve()}"
         )
     except (RunInputError, LiveModelUnavailable) as exc:
         typer.secho(str(exc), fg=typer.colors.RED, err=True)
